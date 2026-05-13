@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>商品带货脚本生成器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#101318",
+              muted: "#667085",
+              line: "#dce3ea",
+              paper: "#f7faf9",
+              mint: "#10a886",
+              coral: "#ff5d47",
+              lime: "#a7d84f"
+            },
+            boxShadow: {
+              soft: "0 18px 60px rgba(16, 19, 24, 0.08)",
+              line: "0 0 0 1px rgba(16, 19, 24, 0.06)"
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        letter-spacing: 0;
+      }
+
+      .field:focus {
+        border-color: #10a886;
+        box-shadow: 0 0 0 4px rgba(16, 168, 134, 0.12);
+      }
+
+      .result-card {
+        animation: rise 0.45s ease both;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-white text-ink">
+    <header class="sticky top-0 z-20 border-b border-line/80 bg-white/92 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
+        <a href="#top" class="flex items-center gap-3 font-semibold">
+          <span class="grid h-9 w-9 place-items-center rounded-lg border border-mint/25 bg-mint/10 text-mint">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 8V6a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M5 8h14l-1 12H6L5 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+              <path d="M9 13h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </span>
+          <span class="text-base sm:text-lg">商品带货脚本生成器</span>
+        </a>
+        <button
+          id="clearBtn"
+          type="button"
+          class="inline-flex h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm font-medium text-ink transition hover:border-ink hover:bg-ink hover:text-white"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M4 7h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path d="M6 7l1 14h10l1-14M9 7V4h6v3" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+          </svg>
+          <span class="hidden sm:inline">清空内容</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="mx-auto max-w-7xl px-5 pb-10 pt-12 sm:px-8 lg:pb-14 lg:pt-16">
+        <div class="grid items-end gap-8 lg:grid-cols-[0.92fr_1.08fr]">
+          <div>
+            <h1 class="max-w-3xl text-4xl font-black leading-tight tracking-normal sm:text-5xl lg:text-6xl">
+              商品带货脚本生成器
+            </h1>
+            <p class="mt-5 max-w-2xl text-base leading-8 text-muted sm:text-lg">
+              输入商品信息和内容方向，一键生成标题、钩子、脚本和评论区话术，适合短视频带货、直播预热和客户提案演示。
+            </p>
+          </div>
+
+          <div class="grid gap-3 border-l-0 border-line/80 pl-0 sm:grid-cols-3 lg:border-l lg:pl-8">
+            <div class="rounded-lg border border-line bg-paper p-4">
+              <div class="text-3xl font-black">10</div>
+              <div class="mt-1 text-sm text-muted">短视频标题</div>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4">
+              <div class="text-3xl font-black">5</div>
+              <div class="mt-1 text-sm text-muted">开头钩子</div>
+            </div>
+            <div class="rounded-lg border border-line bg-paper p-4">
+              <div class="text-3xl font-black">3+5</div>
+              <div class="mt-1 text-sm text-muted">脚本与评论引导</div>
+            </div>
+          </div>
+        </div>
+
+        <form id="generatorForm" class="mt-10 rounded-lg border border-line bg-white p-5 shadow-soft sm:p-7 lg:p-8">
+          <div class="grid gap-6 lg:grid-cols-2">
+            <label class="block">
+              <span class="mb-3 flex items-center gap-2 text-base font-bold">
+                <svg class="h-5 w-5 text-mint" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="m4 12 8-8h8v8l-8 8-8-8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M16 8h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                </svg>
+                商品名称
+              </span>
+              <input
+                id="productName"
+                class="field h-12 w-full rounded-lg border border-line px-4 text-[15px] outline-none transition"
+                maxlength="50"
+                placeholder="例如：便携式榨汁杯"
+                autocomplete="off"
+              />
+              <span class="mt-2 block text-right text-xs text-muted"><b data-count-for="productName">0</b>/50</span>
+            </label>
+
+            <label class="block">
+              <span class="mb-3 flex items-center gap-2 text-base font-bold">
+                <svg class="h-5 w-5 text-mint" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M16 19a4 4 0 0 0-8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2" />
+                  <path d="M20 19a3 3 0 0 0-3-3M4 19a3 3 0 0 1 3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                目标人群
+              </span>
+              <input
+                id="audience"
+                class="field h-12 w-full rounded-lg border border-line px-4 text-[15px] outline-none transition"
+                maxlength="50"
+                placeholder="例如：上班族、学生党、健身人群"
+                autocomplete="off"
+              />
+              <span class="mt-2 block text-right text-xs text-muted"><b data-count-for="audience">0</b>/50</span>
+            </label>
+
+            <label class="block">
+              <span class="mb-3 flex items-center gap-2 text-base font-bold">
+                <svg class="h-5 w-5 text-[#f6b800]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="m12 3 2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                </svg>
+                商品卖点
+              </span>
+              <textarea
+                id="sellingPoints"
+                class="field min-h-28 w-full resize-y rounded-lg border border-line px-4 py-3 text-[15px] leading-7 outline-none transition"
+                maxlength="200"
+                placeholder="例如：30 秒出汁、杯体轻便、可无线充电、清洗方便"
+              ></textarea>
+              <span class="mt-2 block text-right text-xs text-muted"><b data-count-for="sellingPoints">0</b>/200</span>
+            </label>
+
+            <label class="block">
+              <span class="mb-3 flex items-center gap-2 text-base font-bold">
+                <svg class="h-5 w-5 text-mint" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 7h16v13H4V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                  <path d="M8 7V4M16 7V4M4 11h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                使用场景
+              </span>
+              <textarea
+                id="scenario"
+                class="field min-h-28 w-full resize-y rounded-lg border border-line px-4 py-3 text-[15px] leading-7 outline-none transition"
+                maxlength="200"
+                placeholder="例如：通勤路上、健身后、宿舍早餐、办公室下午茶"
+              ></textarea>
+              <span class="mt-2 block text-right text-xs text-muted"><b data-count-for="scenario">0</b>/200</span>
+            </label>
+          </div>
+
+          <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p id="formTip" class="min-h-6 text-sm text-muted">填写越具体，生成的话术越贴近实际投放场景。</p>
+            <button
+              type="submit"
+              class="inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-coral px-7 text-base font-bold text-white shadow-[0_14px_30px_rgba(255,93,71,0.25)] transition hover:-translate-y-0.5 hover:bg-[#ef4f3a] focus:outline-none focus:ring-4 focus:ring-coral/20"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m12 3 1.8 5.1L19 10l-5.2 1.9L12 17l-1.8-5.1L5 10l5.2-1.9L12 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                <path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z" fill="currentColor" />
+              </svg>
+              生成脚本
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section id="resultsSection" class="border-t border-line bg-paper/80 px-5 py-10 sm:px-8 lg:py-12">
+        <div class="mx-auto max-w-7xl">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 class="flex items-center gap-2 text-2xl font-black">
+                <svg class="h-6 w-6 text-mint" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M9 18h6M10 22h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M8 14a6 6 0 1 1 8 0c-.8.7-1 1.3-1 2H9c0-.7-.2-1.3-1-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                </svg>
+                生成结果
+              </h2>
+              <p id="resultMeta" class="mt-2 text-sm text-muted">内容生成后会显示在这里。</p>
+            </div>
+            <button
+              id="copyAllBtn"
+              type="button"
+              class="hidden h-10 items-center justify-center gap-2 rounded-lg border border-line bg-white px-4 text-sm font-bold transition hover:border-ink hover:bg-ink hover:text-white"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="9" y="9" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              复制全部
+            </button>
+          </div>
+
+          <div id="emptyState" class="mt-8 rounded-lg border border-dashed border-line bg-white p-8 text-center shadow-line">
+            <div class="mx-auto grid h-14 w-14 place-items-center rounded-lg bg-mint/10 text-mint">
+              <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 5h14v14H5V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" />
+                <path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </div>
+            <p class="mt-4 text-base font-bold">等待生成第一版带货内容</p>
+            <p class="mt-2 text-sm leading-6 text-muted">输入商品信息后点击「生成脚本」。</p>
+          </div>
+
+          <div id="resultsGrid" class="mt-8 grid gap-5 lg:grid-cols-2 xl:grid-cols-4"></div>
+
+          <p class="mt-6 hidden text-center text-sm text-muted" id="disclaimer">
+            内容仅作创意参考，发布前请结合商品事实、平台规范和实际活动政策调整。
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <button
+      id="backTopBtn"
+      type="button"
+      aria-label="返回顶部"
+      class="fixed bottom-5 right-5 grid h-11 w-11 place-items-center rounded-full border border-line bg-white text-ink shadow-soft transition hover:-translate-y-1 hover:border-ink"
+    >
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 19V5M6 11l6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
+
+    <div
+      id="toast"
+      class="pointer-events-none fixed left-1/2 top-5 z-30 -translate-x-1/2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white opacity-0 shadow-soft transition"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <script>
+      const form = document.querySelector("#generatorForm");
+      const clearBtn = document.querySelector("#clearBtn");
+      const copyAllBtn = document.querySelector("#copyAllBtn");
+      const backTopBtn = document.querySelector("#backTopBtn");
+      const resultsGrid = document.querySelector("#resultsGrid");
+      const emptyState = document.querySelector("#emptyState");
+      const disclaimer = document.querySelector("#disclaimer");
+      const formTip = document.querySelector("#formTip");
+      const resultMeta = document.querySelector("#resultMeta");
+      const toast = document.querySelector("#toast");
+
+      const fields = {
+        productName: document.querySelector("#productName"),
+        audience: document.querySelector("#audience"),
+        sellingPoints: document.querySelector("#sellingPoints"),
+        scenario: document.querySelector("#scenario")
+      };
+
+      let latestOutput = [];
+
+      const icons = {
+        titles:
+          '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h14v14H5V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m10 8 5 4-5 4V8Z" fill="currentColor"/></svg>',
+        hooks:
+          '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 12a5 5 0 0 1 5-5h1M7 12a5 5 0 0 0 5 5h1M7 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M17 7v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+        scripts:
+          '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l4 4v14H7V3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v5h5M10 13h6M10 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+        comments:
+          '<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v10H8l-4 4V6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 10h8M8 13h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+      };
+
+      Object.values(fields).forEach((field) => {
+        field.addEventListener("input", () => {
+          const counter = document.querySelector(`[data-count-for="${field.id}"]`);
+          counter.textContent = field.value.length;
+        });
+      });
+
+      function normalize(value, fallback) {
+        return value.trim().replace(/\s+/g, " ") || fallback;
+      }
+
+      function splitPoints(value) {
+        return normalize(value, "省时省力、品质稳定、使用方便")
+          .split(/[，,、；;\n]/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .slice(0, 4);
+      }
+
+      function makeOutput(data) {
+        const points = splitPoints(data.sellingPoints);
+        const topPoint = points[0] || "省时省力";
+        const secondPoint = points[1] || "使用方便";
+        const thirdPoint = points[2] || "品质稳定";
+        const scene = data.scenario;
+        const product = data.productName;
+        const audience = data.audience;
+
+        const titles = [
+          `${audience}别再乱买了，这款${product}真的很懂你`,
+          `用了 7 天${product}，我终于明白什么叫省心`,
+          `${scene}必备：把${topPoint}做到位的${product}`,
+          `不是所有${product}都适合${audience}，这几点很关键`,
+          `预算有限也想提升体验？先看看这款${product}`,
+          `${topPoint}、${secondPoint}、${thirdPoint}，这款${product}全占了`,
+          `${audience}的真实痛点，被这款${product}解决了`,
+          `每天都用得上的${product}，到底值不值得入？`,
+          `${scene}想更轻松，这款${product}可以直接安排`,
+          `测完这款${product}，我只想说：细节真的加分`
+        ];
+
+        const hooks = [
+          `如果你也是${audience}，这个${scene}的小麻烦一定遇到过。`,
+          `我一开始也觉得${product}都差不多，直到试了这款。`,
+          `别急着下单，先看它的三个细节是不是你需要的。`,
+          `真正好用的${product}，不是参数堆满，而是每天都愿意用。`,
+          `${scene}想省心一点，这个方法可以直接照着试。`
+        ];
+
+        const scripts = [
+          {
+            title: "脚本 1：痛点对比",
+            body: `开场先拍${scene}的真实状态：忙、乱、时间不够。镜头切到${product}，强调它的${topPoint}和${secondPoint}。中段用 2-3 个近景展示操作细节，让${audience}看到它确实能减少麻烦。结尾口播：如果你也想把${scene}变得更轻松，可以先从这款${product}开始试试。`
+          },
+          {
+            title: "脚本 2：清单种草",
+            body: `画面从「${audience}必备好物」清单切入，第一项就是${product}。每个卖点用一个短镜头承接：${points.join("、")}。旁白保持轻快，突出它适合${scene}，最后补一句：不是冲动消费，是能反复用上的实用选择。`
+          },
+          {
+            title: "脚本 3：体验推荐",
+            body: `先给出体验结论：这款${product}最打动我的是${topPoint}。随后展示使用前后的变化，把${audience}关心的${secondPoint}和${thirdPoint}讲清楚。结尾给出购买理由：适合${scene}，上手门槛低，送人自用都不突兀。`
+          }
+        ];
+
+        const comments = [
+          `想要同款${product}的，评论区打「想要」，我把入口发你。`,
+          `你更关心${topPoint}还是${secondPoint}？评论区告诉我。`,
+          `如果你也有${scene}的需求，可以留言，我帮你看看适不适合。`,
+          `已经用过类似产品的朋友，欢迎分享真实体验。`,
+          `喜欢这种实用好物测评，记得收藏，后面继续整理。`
+        ];
+
+        return [
+          { key: "titles", title: "10 个短视频标题", count: "10", accent: "text-mint", items: titles },
+          { key: "hooks", title: "5 个开头钩子", count: "5", accent: "text-mint", items: hooks },
+          { key: "scripts", title: "3 条带货脚本", count: "3", accent: "text-coral", items: scripts },
+          { key: "comments", title: "5 条评论区引导话术", count: "5", accent: "text-[#79a91b]", items: comments }
+        ];
+      }
+
+      function renderResults(groups, data) {
+        latestOutput = groups;
+        resultsGrid.innerHTML = groups
+          .map((group, groupIndex) => {
+            const content =
+              group.key === "scripts"
+                ? group.items
+                    .map(
+                      (script, index) => `
+                        <article class="border-t border-line/80 pt-4 first:border-t-0 first:pt-0">
+                          <h4 class="text-sm font-black text-coral">${script.title}</h4>
+                          <p class="mt-2 text-sm leading-7 text-ink/86">${script.body}</p>
+                        </article>
+                      `
+                    )
+                    .join("")
+                : `<ol class="space-y-3">
+                    ${group.items
+                      .map(
+                        (item, index) => `
+                          <li class="grid grid-cols-[1.75rem_1fr] gap-2 text-sm leading-6">
+                            <span class="${group.accent} font-black">${index + 1}</span>
+                            <span>${item}</span>
+                          </li>
+                        `
+                      )
+                      .join("")}
+                  </ol>`;
+
+            return `
+              <section class="result-card rounded-lg border border-line bg-white p-5 shadow-line" style="animation-delay: ${groupIndex * 70}ms">
+                <div class="mb-5 flex items-center justify-between gap-3">
+                  <h3 class="flex items-center gap-3 text-base font-black">
+                    <span class="grid h-9 w-9 place-items-center rounded-lg bg-paper ${group.accent}">${icons[group.key]}</span>
+                    ${group.title}
+                  </h3>
+                  <span class="grid h-8 min-w-8 place-items-center rounded-full bg-paper px-2 text-sm font-black ${group.accent}">${group.count}</span>
+                </div>
+                <div class="space-y-4">${content}</div>
+                <button
+                  type="button"
+                  class="copy-group mt-5 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-line text-sm font-bold transition hover:border-mint hover:bg-mint hover:text-white"
+                  data-group="${group.key}"
+                >
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect x="9" y="9" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  </svg>
+                  复制本组
+                </button>
+              </section>
+            `;
+          })
+          .join("");
+
+        emptyState.classList.add("hidden");
+        copyAllBtn.classList.remove("hidden");
+        copyAllBtn.classList.add("inline-flex");
+        disclaimer.classList.remove("hidden");
+        resultMeta.textContent = `已基于「${data.productName}」生成，适配「${data.audience}」与「${data.scenario}」。`;
+      }
+
+      function groupToText(group) {
+        const lines = [`【${group.title}】`];
+        group.items.forEach((item, index) => {
+          if (group.key === "scripts") {
+            lines.push(`${index + 1}. ${item.title}`);
+            lines.push(item.body);
+          } else {
+            lines.push(`${index + 1}. ${item}`);
+          }
+        });
+        return lines.join("\n");
+      }
+
+      async function copyText(text, message) {
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast(message);
+        } catch (error) {
+          const helper = document.createElement("textarea");
+          helper.value = text;
+          document.body.appendChild(helper);
+          helper.select();
+          document.execCommand("copy");
+          helper.remove();
+          showToast(message);
+        }
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.remove("opacity-0");
+        toast.classList.add("opacity-100");
+        window.setTimeout(() => {
+          toast.classList.remove("opacity-100");
+          toast.classList.add("opacity-0");
+        }, 1600);
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const data = {
+          productName: normalize(fields.productName.value, ""),
+          audience: normalize(fields.audience.value, ""),
+          sellingPoints: normalize(fields.sellingPoints.value, ""),
+          scenario: normalize(fields.scenario.value, "")
+        };
+
+        const missing = Object.entries(data).filter(([, value]) => !value);
+        if (missing.length) {
+          formTip.textContent = "请先补全商品名称、目标人群、商品卖点和使用场景。";
+          formTip.className = "min-h-6 text-sm font-medium text-coral";
+          fields[missing[0][0]].focus();
+          return;
+        }
+
+        formTip.textContent = "已生成一版可演示内容，可继续修改输入后重新生成。";
+        formTip.className = "min-h-6 text-sm font-medium text-mint";
+        renderResults(makeOutput(data), data);
+        document.querySelector("#resultsSection").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      resultsGrid.addEventListener("click", (event) => {
+        const button = event.target.closest(".copy-group");
+        if (!button) return;
+        const group = latestOutput.find((item) => item.key === button.dataset.group);
+        if (group) copyText(groupToText(group), "已复制本组内容");
+      });
+
+      copyAllBtn.addEventListener("click", () => {
+        if (!latestOutput.length) return;
+        copyText(latestOutput.map(groupToText).join("\n\n"), "已复制全部生成结果");
+      });
+
+      clearBtn.addEventListener("click", () => {
+        Object.values(fields).forEach((field) => {
+          field.value = "";
+          const counter = document.querySelector(`[data-count-for="${field.id}"]`);
+          counter.textContent = "0";
+        });
+        latestOutput = [];
+        resultsGrid.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        copyAllBtn.classList.add("hidden");
+        copyAllBtn.classList.remove("inline-flex");
+        disclaimer.classList.add("hidden");
+        resultMeta.textContent = "内容生成后会显示在这里。";
+        formTip.textContent = "填写越具体，生成的话术越贴近实际投放场景。";
+        formTip.className = "min-h-6 text-sm text-muted";
+      });
+
+      backTopBtn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    </script>
+  </body>
+</html>

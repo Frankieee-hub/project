@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>X 发帖预演台 | France AI印钞机实验室</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="rail" aria-label="主导航">
+        <div class="brand-mark">X</div>
+        <nav class="nav-list">
+          <button class="nav-item active" type="button"><span class="nav-icon">⌂</span><span>主页</span></button>
+          <button class="nav-item" type="button"><span class="nav-icon">⌕</span><span>探索</span></button>
+          <button class="nav-item" type="button"><span class="nav-icon">○</span><span>通知</span></button>
+          <button class="nav-item" type="button"><span class="nav-icon">✉</span><span>私信</span></button>
+          <button class="nav-item" type="button"><span class="nav-icon">◇</span><span>Premium+</span></button>
+          <button class="nav-item" type="button"><span class="nav-icon">☰</span><span>更多</span></button>
+        </nav>
+        <button class="post-button" type="button">发帖预演</button>
+      </aside>
+
+      <main class="timeline" aria-label="主页预览">
+        <header class="topbar">
+          <div>
+            <h1>France | AI印钞机实验室</h1>
+            <p>本地预览 · 手动复制发布 · 不连接 X 账号</p>
+          </div>
+          <button class="ghost-button" id="copyAllTop" type="button">复制今日发布包</button>
+        </header>
+
+        <section class="profile-card" aria-label="个人主页头图">
+          <div class="banner">
+            <div class="ai-face" aria-hidden="true"></div>
+            <div class="banner-lines" aria-hidden="true"></div>
+          </div>
+          <div class="profile-body">
+            <div class="avatar" aria-hidden="true"></div>
+            <button class="edit-profile" type="button">编辑个人资料</button>
+            <h2>France | AI印钞机实验室 <span class="verified">✓</span></h2>
+            <p class="handle">@France441483</p>
+            <p class="bio">
+              前大厂产品经理｜每天拆 1 个 AI 副业案例<br />
+              只讲普通人能不能做、怎么做、多久见钱<br />
+              AI工具｜自动化副业｜出海项目｜实操复盘
+            </p>
+            <div class="profile-meta">
+              <span>2025年12月 加入</span>
+              <span><strong>1</strong> 正在关注</span>
+              <span><strong>2</strong> 关注者</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="tabs" aria-label="内容类型">
+          <button class="tab active" data-tab="single" type="button">单条</button>
+          <button class="tab" data-tab="thread" type="button">Thread</button>
+          <button class="tab" data-tab="comments" type="button">评论</button>
+          <button class="tab" data-tab="images" type="button">配图</button>
+          <button class="tab" data-tab="records" type="button">发布记录</button>
+          <button class="tab" data-tab="plan" type="button">节奏</button>
+        </section>
+
+        <section class="feed" id="feed" aria-live="polite"></section>
+      </main>
+
+      <aside class="inspector" aria-label="运营建议和复制面板">
+        <section class="panel composer-panel">
+          <div class="panel-heading">
+            <h2>发布前检查</h2>
+            <span class="status-dot">手动安全</span>
+          </div>
+          <div class="check-list">
+            <label><input type="checkbox" checked /> 没有夸张收益承诺</label>
+            <label><input type="checkbox" checked /> 没有诱导刷互动</label>
+            <label><input type="checkbox" checked /> 有清晰人设和记录感</label>
+            <label><input type="checkbox" /> 已确认图片和正文匹配</label>
+          </div>
+          <button class="primary-action" id="copySelected" type="button">复制当前视图</button>
+          <p class="fine-print">复制后手动粘贴到 X。页面不会读取账号，不会保存密钥，不会自动发布。</p>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>图片接口</h2>
+            <span class="status-dot" id="apiStatus">检测中</span>
+          </div>
+          <p class="explain">
+            图片生成走本地 Node 服务代理，API Key 只放在本机 `.env`，不会出现在网页源码里。
+          </p>
+          <div class="mini-flow">
+            <span>1. 写配图提示词</span>
+            <span>2. 生成图片到本地</span>
+            <span>3. 下载或手动上传 X</span>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Thread 是什么</h2>
+          </div>
+          <p class="explain">
+            Thread 就是连续帖：第 1 条先发出去，再把第 2 条作为回复接在下面，后面的内容依次回复上一条。
+          </p>
+        </section>
+
+        <section class="panel metrics-panel">
+          <div class="panel-heading">
+            <h2>当前目标</h2>
+          </div>
+          <div class="metric-row"><span>60 天目标</span><strong>打平 P+</strong></div>
+          <div class="metric-row"><span>优先路径</span><strong>低价产品</strong></div>
+          <div class="metric-row"><span>今日日期</span><strong>2026/5/13</strong></div>
+        </section>
+      </aside>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">已复制</div>
+    <script src="./app.js"></script>
+  </body>
+</html>

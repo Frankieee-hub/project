@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>抖音直播话术审核与优化工作台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">审</div>
+          <div>
+            <h1>话术审核台</h1>
+            <p>直播话术识别、审核、重写</p>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="工具模块">
+          <button class="nav-item active" data-section="workspace">智能工作台</button>
+          <button class="nav-item" data-section="rules">最新规则库</button>
+          <button class="nav-item" data-section="taxonomy">类目体系</button>
+        </nav>
+
+        <section class="source-box">
+          <h2>规则口径</h2>
+          <p>已补入 2026 年抖音电商对虚假价格、低价错觉、违规营销噱头、虚假限时限量等治理重点。</p>
+          <p class="updated">规则更新：2026-05-09</p>
+        </section>
+      </aside>
+
+      <section class="main-panel">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Douyin Live Script Auditor</p>
+            <h2>自动识别商品类目、主播风格、卖点凭证，并整理一轮完整话术</h2>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-btn" id="sampleBtn" type="button">载入示例</button>
+            <button class="primary-btn" id="auditBtn" type="button">智能审核</button>
+          </div>
+        </header>
+
+        <section class="section-view active" id="workspace">
+          <div class="workspace-grid">
+            <section class="input-panel">
+              <div class="panel-title">
+                <div>
+                  <h3>上传或粘贴 TXT 话术</h3>
+                  <p>即使录音从中间开始，也会尝试识别一轮话术的起点、卖点段、价格段和收口段。</p>
+                </div>
+                <label class="file-btn">
+                  上传 TXT
+                  <input id="fileInput" type="file" accept=".txt,text/plain" />
+                </label>
+              </div>
+
+              <textarea
+                id="scriptInput"
+                spellcheck="false"
+                placeholder="粘贴录音转写 TXT：主播可能从讲卖点、讲价格、催单或答疑中间开始..."
+              ></textarea>
+
+              <div class="auto-grid">
+                <article>
+                  <span>自动类目</span>
+                  <strong id="detectedCategory">待识别</strong>
+                  <small id="categoryPath">上传后自动生成：主要类目 / 一级类目 / 二级类目</small>
+                </article>
+                <article>
+                  <span>主播风格</span>
+                  <strong id="detectedStyle">待识别</strong>
+                  <small id="styleReason">根据语气、催单强度、讲解密度识别</small>
+                </article>
+                <article>
+                  <span>核心卖点</span>
+                  <strong id="detectedSellingPoints">待识别</strong>
+                  <small>可从材质、规格、功能、场景、价格和赠品中抽取</small>
+                </article>
+                <article>
+                  <span>事实凭证</span>
+                  <strong id="detectedProofs">待识别</strong>
+                  <small>识别详情页、检测、规格、资质、发货、售后等依据</small>
+                </article>
+              </div>
+            </section>
+
+            <section class="score-panel">
+              <div class="score-card">
+                <span>合规评分</span>
+                <strong id="scoreValue">--</strong>
+                <p id="scoreLabel">等待审核</p>
+              </div>
+              <div class="metric-list">
+                <div><span>风险命中</span><strong id="riskCount">0</strong></div>
+                <div><span>高风险</span><strong id="highCount">0</strong></div>
+                <div><span>识别轮次</span><strong id="roundCount">0</strong></div>
+                <div><span>可整理段落</span><strong id="segmentCount">0</strong></div>
+              </div>
+              <button class="secondary-btn" id="exportBtn" type="button">导出审核报告</button>
+            </section>
+          </div>
+
+          <section class="round-panel">
+            <div class="panel-title compact">
+              <h3>一轮话术识别</h3>
+              <p>自动寻找当前 TXT 中最完整的一轮成交话术；如果文本从中间开始，会补齐建议开场和自然收口。</p>
+            </div>
+            <div id="roundMap" class="round-map">
+              <div class="empty-state">审核后显示话术起止、段落结构和缺失环节。</div>
+            </div>
+          </section>
+
+          <section class="result-grid">
+            <div class="result-panel">
+              <div class="panel-title compact">
+                <h3>风险定位</h3>
+                <p>按最新治理口径标记原句、风险等级、触发规则和可替代表达。</p>
+              </div>
+              <div class="risk-list" id="riskList">
+                <div class="empty-state">提交话术后，这里会显示命中的风险点。</div>
+              </div>
+            </div>
+
+            <div class="result-panel">
+              <div class="panel-title compact">
+                <h3>整理优化稿</h3>
+                <p>不是简单替换词，而是按“开场承接-痛点-卖点-规格-价格-收口”重组当前 TXT。</p>
+              </div>
+              <div class="optimized-output" id="optimizedOutput">
+                <div class="empty-state">审核完成后自动生成可复制的优化版本。</div>
+              </div>
+              <button class="ghost-btn copy-btn" id="copyBtn" type="button">复制优化稿</button>
+            </div>
+          </section>
+        </section>
+
+        <section class="section-view" id="rules">
+          <div class="rules-toolbar">
+            <h3>抖音直播话术规则库</h3>
+            <input id="ruleSearch" type="search" placeholder="搜索：低价错觉、虚假限时、功效、站外交易..." />
+          </div>
+          <div class="rules-grid" id="rulesGrid"></div>
+        </section>
+
+        <section class="section-view" id="taxonomy">
+          <div class="rules-toolbar">
+            <h3>主要类目 / 一级类目 / 二级类目</h3>
+            <input id="taxonomySearch" type="search" placeholder="搜索：保鲜袋、护肤、茶叶、童装..." />
+          </div>
+          <div class="taxonomy-grid" id="taxonomyGrid"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
