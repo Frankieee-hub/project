@@ -1,0 +1,24 @@
+{
+  "sites": [
+    {
+      "name": "Example Store A",
+      "url": "https://example.com/",
+      "currency": "USD"
+    }
+  ],
+  "keywords": [
+    "sale",
+    "discount",
+    "% off",
+    "free shipping",
+    "free delivery",
+    "bundle",
+    "buy one",
+    "buy 1",
+    "save",
+    "limited time",
+    "new arrival",
+    "new arrivals",
+    "launch"
+  ]
+}
