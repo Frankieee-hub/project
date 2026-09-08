@@ -4,12 +4,34 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "23 5 * * *"
+  pull_request:
+    paths:
+      - "projects/bidsignal/**"
+      - ".github/workflows/bidsignal-daily.yml"
 
 permissions:
   contents: write
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Static syntax check
+        run: python -m py_compile projects/bidsignal/fetch_tenders.py projects/bidsignal/test_fetch_tenders.py
+
+      - name: Unit tests
+        run: python -m unittest projects/bidsignal/test_fetch_tenders.py
+
   fetch-and-rank:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,7 +44,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build daily digest
+      - name: Build daily digest from live TED data
         working-directory: projects/bidsignal
         run: python fetch_tenders.py
 
