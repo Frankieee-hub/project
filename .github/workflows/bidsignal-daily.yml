@@ -1,0 +1,36 @@
+name: BidSignal Daily
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 5 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch-and-rank:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: bidsignal-mvp
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build daily digest
+        working-directory: projects/bidsignal
+        run: python fetch_tenders.py
+
+      - name: Commit digest
+        run: |
+          git config user.name "bidsignal-bot"
+          git config user.email "bidsignal-bot@users.noreply.github.com"
+          git add projects/bidsignal/data/latest.json projects/bidsignal/data/latest.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Update BidSignal daily digest"
+          git push origin HEAD:bidsignal-mvp
