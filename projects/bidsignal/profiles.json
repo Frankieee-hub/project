@@ -1,0 +1,14 @@
+[
+  {
+    "name": "AI & software consulting",
+    "include": ["artificial intelligence", "machine learning", "software development", "data analytics", "automation", "cloud", "IT consulting"],
+    "exclude": ["hardware supply", "medical device"],
+    "countries": []
+  },
+  {
+    "name": "Creative & digital agency",
+    "include": ["digital marketing", "website", "graphic design", "video production", "social media", "branding", "advertising"],
+    "exclude": ["printing equipment"],
+    "countries": []
+  }
+]
