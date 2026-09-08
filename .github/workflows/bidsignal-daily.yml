@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "23 5 * * *"
+  push:
+    branches: ["main"]
+    paths:
+      - "projects/bidsignal/**"
+      - ".github/workflows/bidsignal-daily.yml"
   pull_request:
     paths:
       - "projects/bidsignal/**"
@@ -31,13 +36,12 @@ jobs:
         run: python -m unittest projects/bidsignal/test_fetch_tenders.py
 
   fetch-and-rank:
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: validate
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout default branch
         uses: actions/checkout@v4
-        with:
-          ref: bidsignal-mvp
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -55,4 +59,4 @@ jobs:
           git add projects/bidsignal/data/latest.json projects/bidsignal/data/latest.html
           git diff --cached --quiet && exit 0
           git commit -m "Update BidSignal daily digest"
-          git push origin HEAD:bidsignal-mvp
+          git push origin HEAD:main
