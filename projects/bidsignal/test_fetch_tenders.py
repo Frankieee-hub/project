@@ -67,7 +67,7 @@ class BidSignalTests(unittest.TestCase):
                     {"publication-number": "B-2026"},
                 ],
                 "iterationNextToken": "next-1",
-                "totalNoticeCount": 3,
+                "totalNoticeCount": 4,
                 "timedOut": False,
             },
             {
