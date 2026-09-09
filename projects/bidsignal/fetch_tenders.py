@@ -43,7 +43,7 @@ def post_json(url, payload):
         headers={
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "BidSignal/0.2 (+https://github.com/Frankieee-hub/project)",
+            "User-Agent": "BidSignal/0.3 (+https://github.com/Frankieee-hub/project)",
         },
         method="POST",
     )
@@ -162,13 +162,37 @@ def score_notice(notice, profile):
     return score, hits
 
 
+def expert_query_for_date(date_value):
+    return f"publication-date={date_value:%Y%m%d}"
+
+
+def validation_request_for_date(date_value):
+    """TED checkQuerySyntax validates only; it intentionally does not execute a search."""
+    return {
+        "query": expert_query_for_date(date_value),
+        "fields": ["publication-number"],
+        "page": 1,
+        "limit": 1,
+        "scope": "ALL",
+        "checkQuerySyntax": True,
+        "paginationMode": "PAGE_NUMBER",
+        "onlyLatestVersions": False,
+    }
+
+
+def validate_query_for_date(date_value):
+    response = post_json(TED_SEARCH_URL, validation_request_for_date(date_value))
+    if response.get("timedOut"):
+        raise RuntimeError("TED query syntax validation timed out")
+
+
 def request_for_date(date_value, token=None):
     payload = {
-        "query": f"publication-date = {date_value:%Y%m%d}",
+        "query": expert_query_for_date(date_value),
         "fields": TED_FIELDS,
         "limit": PAGE_SIZE,
         "scope": "ACTIVE",
-        "checkQuerySyntax": True,
+        "checkQuerySyntax": False,
         "paginationMode": "ITERATION",
         "onlyLatestVersions": True,
     }
@@ -180,18 +204,31 @@ def request_for_date(date_value, token=None):
 def fetch_publication_day(date_value):
     notices = []
     token = None
-    timed_out = False
+    first_total = None
 
     for _ in range(MAX_ITERATION_PAGES):
         response = post_json(TED_SEARCH_URL, request_for_date(date_value, token))
-        timed_out = timed_out or bool(response.get("timedOut"))
-        batch = response.get("notices") or response.get("results") or []
-        notices.extend(batch)
+        if response.get("timedOut"):
+            raise RuntimeError(f"TED search timed out for publication date {date_value.isoformat()}")
 
-        next_token = response.get("iterationNextToken")
-        if not next_token or next_token == token or not batch:
+        if first_total is None:
+            first_total = response.get("totalNoticeCount")
+
+        batch = response.get("notices") or response.get("results") or []
+        if not isinstance(batch, list):
+            raise RuntimeError("TED response notices field is not an array")
+        if not batch:
             break
+
+        notices.extend(batch)
+        next_token = response.get("iterationNextToken")
+        if not next_token:
+            raise RuntimeError("TED returned a non-empty iteration page without a continuation token")
+        if next_token == token:
+            raise RuntimeError("TED returned the same iteration token twice")
         token = next_token
+    else:
+        raise RuntimeError(f"TED iteration exceeded {MAX_ITERATION_PAGES} pages")
 
     deduped = {}
     for notice in notices:
@@ -199,11 +236,19 @@ def fetch_publication_day(date_value):
         if key:
             deduped[key] = notice
 
-    return list(deduped.values()), timed_out
+    if first_total is not None and len(notices) != first_total:
+        raise RuntimeError(
+            f"TED iteration count mismatch for {date_value.isoformat()}: "
+            f"expected {first_total}, fetched {len(notices)}"
+        )
+
+    return list(deduped.values()), False
 
 
 def fetch_latest_publication_day(now=None):
     now = now or datetime.now(timezone.utc)
+    validate_query_for_date(now.date())
+
     for days_back in range(MAX_LOOKBACK_DAYS + 1):
         candidate = (now - timedelta(days=days_back)).date()
         notices, timed_out = fetch_publication_day(candidate)

@@ -59,7 +59,7 @@ class BidSignalTests(unittest.TestCase):
         score, _ = mod.score_notice(notice, profile)
         self.assertLess(score, 0)
 
-    def test_iteration_fetch_deduplicates(self):
+    def test_iteration_fetch_deduplicates_and_reaches_empty_terminal_page(self):
         responses = [
             {
                 "notices": [
@@ -67,6 +67,7 @@ class BidSignalTests(unittest.TestCase):
                     {"publication-number": "B-2026"},
                 ],
                 "iterationNextToken": "next-1",
+                "totalNoticeCount": 4,
                 "timedOut": False,
             },
             {
@@ -74,6 +75,11 @@ class BidSignalTests(unittest.TestCase):
                     {"publication-number": "B-2026"},
                     {"publication-number": "C-2026"},
                 ],
+                "iterationNextToken": "next-2",
+                "timedOut": False,
+            },
+            {
+                "notices": [],
                 "iterationNextToken": None,
                 "timedOut": False,
             },
@@ -83,7 +89,7 @@ class BidSignalTests(unittest.TestCase):
         self.assertEqual(len(notices), 3)
         self.assertFalse(timed_out)
 
-    def test_request_uses_official_field_names(self):
+    def test_live_request_disables_syntax_only_mode(self):
         payload = mod.request_for_date(date(2026, 9, 8))
         self.assertIn("estimated-value-proc", payload["fields"])
         self.assertIn("estimated-value-cur-proc", payload["fields"])
@@ -92,6 +98,16 @@ class BidSignalTests(unittest.TestCase):
         self.assertNotIn("document-sent-date", payload["fields"])
         self.assertEqual(payload["paginationMode"], "ITERATION")
         self.assertTrue(payload["onlyLatestVersions"])
+        self.assertFalse(payload["checkQuerySyntax"])
+
+    def test_validation_request_is_syntax_only(self):
+        payload = mod.validation_request_for_date(date(2026, 9, 8))
+        self.assertTrue(payload["checkQuerySyntax"])
+        self.assertEqual(payload["limit"], 1)
+        self.assertEqual(payload["paginationMode"], "PAGE_NUMBER")
+
+    def test_expert_query_format(self):
+        self.assertEqual(mod.expert_query_for_date(date(2026, 9, 8)), "publication-date=20260908")
 
 
 if __name__ == "__main__":
